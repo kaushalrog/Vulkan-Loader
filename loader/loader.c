@@ -147,10 +147,10 @@ bool loader_check_version_meets_required(loader_api_version required, loader_api
 const char *get_enabled_by_what_str(enum loader_layer_enabled_by_what enabled_by_what) {
     switch (enabled_by_what) {
         default:
-            assert(true && "Shouldn't reach this");
+            assert(false && "Shouldn't reach this");
             return "Unknown";
         case (ENABLED_BY_WHAT_UNSET):
-            assert(true && "Shouldn't reach this");
+            assert(false && "Shouldn't reach this");
             return "Unknown";
         case (ENABLED_BY_WHAT_LOADER_SETTINGS_FILE):
             return "Loader Settings File (Vulkan Configurator)";
@@ -355,11 +355,11 @@ VkResult prepend_str_to_string_list(const struct loader_instance *inst, struct l
 VkResult copy_str_to_string_list(const struct loader_instance *inst, struct loader_string_list *string_list, const char *str,
                                  size_t str_len) {
     assert(string_list && str);
-    char *new_str = loader_instance_heap_calloc(inst, sizeof(char *) * str_len + 1, VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
+    char *new_str = loader_instance_heap_calloc(inst, str_len + 1, VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
     if (NULL == new_str) {
         return VK_ERROR_OUT_OF_HOST_MEMORY;
     }
-    loader_strncpy(new_str, sizeof(char *) * str_len + 1, str, str_len);
+    loader_strncpy(new_str, str_len + 1, str, str_len);
     new_str[str_len] = '\0';
     return append_str_to_string_list(inst, string_list, new_str);
 }
@@ -367,11 +367,11 @@ VkResult copy_str_to_string_list(const struct loader_instance *inst, struct load
 VkResult copy_str_to_start_of_string_list(const struct loader_instance *inst, struct loader_string_list *string_list,
                                           const char *str, size_t str_len) {
     assert(string_list && str);
-    char *new_str = loader_instance_heap_calloc(inst, sizeof(char *) * str_len + 1, VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
+    char *new_str = loader_instance_heap_calloc(inst, str_len + 1, VK_SYSTEM_ALLOCATION_SCOPE_INSTANCE);
     if (NULL == new_str) {
         return VK_ERROR_OUT_OF_HOST_MEMORY;
     }
-    loader_strncpy(new_str, sizeof(char *) * str_len + 1, str, str_len);
+    loader_strncpy(new_str, str_len + 1, str, str_len);
     new_str[str_len] = '\0';
     return prepend_str_to_string_list(inst, string_list, new_str);
 }
@@ -794,6 +794,9 @@ bool loader_find_layer_name_in_meta_layer(const struct loader_instance *inst, co
         }
         struct loader_layer_properties *comp_layer_props =
             loader_find_layer_property(meta_layer_props->component_layer_names.list[comp_layer], layer_list);
+        if (comp_layer_props == NULL) {
+            continue;
+        }
         if (comp_layer_props->type_flags & VK_LAYER_TYPE_FLAG_META_LAYER) {
             return loader_find_layer_name_in_meta_layer(inst, layer_name, layer_list, comp_layer_props);
         }
